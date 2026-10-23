@@ -1,0 +1,197 @@
+<Window x:Class="MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:shell="clr-namespace:System.Windows.Shell;assembly=PresentationFramework"
+        Title="Nova — A little room for sound" Icon="Assets/Nova.ico"
+        Width="1480" Height="940" MinWidth="1040" MinHeight="700"
+        WindowStartupLocation="CenterScreen" WindowStyle="None" ResizeMode="CanResize"
+        Background="#141218" Foreground="#E6E0E9" FontFamily="Segoe UI" FontSize="14"
+        UseLayoutRounding="True" SnapsToDevicePixels="True"
+        Loaded="Window_Loaded" SizeChanged="Window_SizeChanged" PreviewKeyDown="Window_PreviewKeyDown">
+    <shell:WindowChrome.WindowChrome>
+        <shell:WindowChrome CaptionHeight="78" CornerRadius="12" GlassFrameThickness="0" ResizeBorderThickness="6" UseAeroCaptionButtons="False"/>
+    </shell:WindowChrome.WindowChrome>
+    <Window.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries><ResourceDictionary Source="Themes/NovaTheme.xaml"/></ResourceDictionary.MergedDictionaries>
+            <DrawingBrush x:Key="NovaArtwork" Stretch="UniformToFill">
+                <DrawingBrush.Drawing>
+                    <DrawingGroup>
+                        <DrawingGroup.ClipGeometry><RectangleGeometry Rect="0,0,320,300"/></DrawingGroup.ClipGeometry>
+                        <GeometryDrawing Brush="#332A46" Geometry="M0,0 H320 V300 H0 Z"/>
+                        <GeometryDrawing Brush="#A86F5B"><GeometryDrawing.Geometry><EllipseGeometry Center="292,40" RadiusX="83" RadiusY="83"/></GeometryDrawing.Geometry></GeometryDrawing>
+                        <GeometryDrawing Brush="#5A4878" Geometry="M0,172 C40,111 82,130 117,188 C159,260 191,188 228,227 C269,270 304,241 320,221 V300 H0 Z"/>
+                        <GeometryDrawing Brush="#D0BCFF">
+                            <GeometryDrawing.Geometry>
+                                <GeometryGroup FillRule="Nonzero">
+                                    <EllipseGeometry Center="133,140" RadiusX="30" RadiusY="88"/>
+                                    <EllipseGeometry Center="133,140" RadiusX="30" RadiusY="88"><EllipseGeometry.Transform><RotateTransform Angle="45" CenterX="133" CenterY="140"/></EllipseGeometry.Transform></EllipseGeometry>
+                                    <EllipseGeometry Center="133,140" RadiusX="30" RadiusY="88"><EllipseGeometry.Transform><RotateTransform Angle="90" CenterX="133" CenterY="140"/></EllipseGeometry.Transform></EllipseGeometry>
+                                    <EllipseGeometry Center="133,140" RadiusX="30" RadiusY="88"><EllipseGeometry.Transform><RotateTransform Angle="135" CenterX="133" CenterY="140"/></EllipseGeometry.Transform></EllipseGeometry>
+                                </GeometryGroup>
+                            </GeometryDrawing.Geometry>
+                        </GeometryDrawing>
+                        <GeometryDrawing Brush="#211F26"><GeometryDrawing.Geometry><EllipseGeometry Center="133,140" RadiusX="27" RadiusY="27"/></GeometryDrawing.Geometry></GeometryDrawing>
+                        <GeometryDrawing Brush="#EADDFF" Geometry="M262,210 L269,226 L286,233 L269,240 L262,256 L255,240 L238,233 L255,226 Z"/>
+                    </DrawingGroup>
+                </DrawingBrush.Drawing>
+            </DrawingBrush>
+            <DataTemplate x:Key="QueueTemplate">
+                <Button Style="{StaticResource BaseButton}" HorizontalContentAlignment="Stretch" Padding="8,8" Margin="-4,1" Tag="{Binding Path}" Click="QueueTrackButton_Click" ToolTip="Play this track">
+                    <Grid>
+                        <Grid.ColumnDefinitions><ColumnDefinition Width="38"/><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions>
+                        <Border Width="36" Height="36" CornerRadius="10" Background="{StaticResource NovaArtwork}" ClipToBounds="True" SizeChanged="Artwork_SizeChanged"><Image Source="{Binding CoverImage}" Stretch="UniformToFill"/></Border>
+                        <StackPanel Grid.Column="1" VerticalAlignment="Center" Margin="11,0,9,0"><TextBlock Text="{Binding Title}" FontSize="12" FontWeight="SemiBold" TextTrimming="CharacterEllipsis"/><TextBlock Text="{Binding Artist}" FontSize="10" Foreground="{StaticResource MutedBrush}" TextTrimming="CharacterEllipsis" Margin="0,3,0,0"/></StackPanel>
+                        <TextBlock Grid.Column="2" Text="{Binding Duration}" FontSize="10" Foreground="{StaticResource MutedBrush}" VerticalAlignment="Center"/>
+                    </Grid>
+                </Button>
+            </DataTemplate>
+        </ResourceDictionary>
+    </Window.Resources>
+    <Grid Margin="24,0,24,0">
+        <Grid.RowDefinitions><RowDefinition Height="78"/><RowDefinition Height="66"/><RowDefinition Height="*"/><RowDefinition Height="40"/></Grid.RowDefinitions>
+        <Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition x:Name="ListeningColumn" Width="360"/></Grid.ColumnDefinitions>
+
+        <!-- Material-inspired app bar with a tonal search field. -->
+        <Grid Grid.ColumnSpan="2">
+            <Grid.ColumnDefinitions><ColumnDefinition Width="220"/><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions>
+            <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                <TextBlock Text="nova" FontSize="29" FontWeight="SemiBold" Foreground="{StaticResource AccentBrush}" Margin="0,-4,0,0"/>
+                <Border Width="1" Height="22" Background="#49454F" Margin="16,0"/>
+                <TextBlock Text="Your music,&#x0a;at your pace." FontSize="10" Foreground="{StaticResource MutedBrush}" VerticalAlignment="Center" LineHeight="14"/>
+            </StackPanel>
+            <Border Grid.Column="1" MaxWidth="500" Height="48" Background="#2B2930" CornerRadius="25" Margin="20,0,36,0" VerticalAlignment="Center" shell:WindowChrome.IsHitTestVisibleInChrome="True">
+                <Grid Margin="18,0,12,0">
+                    <Grid.ColumnDefinitions><ColumnDefinition Width="30"/><ColumnDefinition Width="*"/><ColumnDefinition Width="28"/></Grid.ColumnDefinitions>
+                    <TextBlock Text="&#xE721;" Style="{StaticResource Icon}" FontSize="18" Foreground="#CAC4D0" HorizontalAlignment="Left"/>
+                    <TextBox x:Name="SearchBox" Grid.Column="1" Background="Transparent" Foreground="#E6E0E9" CaretBrush="#D0BCFF" BorderThickness="0" Padding="0" VerticalContentAlignment="Center" FontSize="13" TextChanged="SearchBox_TextChanged" AutomationProperties.Name="Search your music"/>
+                    <TextBlock Grid.Column="1" Text="Search songs, artists or albums" Foreground="#CAC4D0" VerticalAlignment="Center" IsHitTestVisible="False" FontSize="13">
+                        <TextBlock.Style><Style TargetType="TextBlock"><Setter Property="Visibility" Value="Collapsed"/><Style.Triggers><DataTrigger Binding="{Binding Text, ElementName=SearchBox}" Value=""><Setter Property="Visibility" Value="Visible"/></DataTrigger></Style.Triggers></Style></TextBlock.Style>
+                    </TextBlock>
+                    <Button Grid.Column="2" Style="{StaticResource IconButton}" Width="28" Height="32" FontSize="11" Content="&#xE711;" Click="ClearSearchButton_Click" ToolTip="Clear search" AutomationProperties.Name="Clear search"/>
+                </Grid>
+            </Border>
+            <StackPanel Grid.Column="2" Orientation="Horizontal" VerticalAlignment="Center" shell:WindowChrome.IsHitTestVisibleInChrome="True">
+                <Border Background="#4F378B" CornerRadius="20" Padding="11,8" Margin="0,0,14,0">
+                    <StackPanel Orientation="Horizontal"><TextBlock Text="&#xE77B;" Style="{StaticResource Icon}" FontSize="14" Foreground="#EADDFF" Margin="0,0,7,0"/><TextBlock x:Name="UserNameText" Text="Your space" MaxWidth="90" TextTrimming="CharacterEllipsis" FontSize="11" FontWeight="SemiBold" VerticalAlignment="Center" Foreground="#EADDFF"/></StackPanel>
+                </Border>
+                <Button Style="{StaticResource IconButton}" Content="&#xE921;" FontSize="11" Click="MinimizeWindow_Click" ToolTip="Minimize" AutomationProperties.Name="Minimize window"/>
+                <Button x:Name="MaximizeWindowButton" Style="{StaticResource IconButton}" Content="&#xE922;" FontSize="11" Click="MaximizeWindow_Click" ToolTip="Maximize or restore" AutomationProperties.Name="Maximize or restore window"/>
+                <Button Style="{StaticResource IconButton}" Content="&#xE8BB;" FontSize="12" Click="CloseWindow_Click" ToolTip="Close" AutomationProperties.Name="Close window"/>
+            </StackPanel>
+        </Grid>
+
+        <!-- Horizontal navigation replaces the previous sidebar. -->
+        <Grid Grid.Row="1" Grid.ColumnSpan="2" Margin="0,0,0,14">
+            <Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions>
+            <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                <Button x:Name="BrowseButton" Style="{StaticResource NavButton}" Background="{StaticResource SecondaryContainerBrush}" Click="BrowseButton_Click"><StackPanel Orientation="Horizontal"><TextBlock Text="&#xE8F1;" Style="{StaticResource Icon}" FontSize="15" Margin="0,0,9,0"/><TextBlock Text="Collection" VerticalAlignment="Center"/></StackPanel></Button>
+                <Button x:Name="FavouritesButton" Style="{StaticResource NavButton}" Click="FavouritesButton_Click"><StackPanel Orientation="Horizontal"><TextBlock Text="&#xEB51;" Style="{StaticResource Icon}" FontSize="15" Margin="0,0,9,0"/><TextBlock Text="Favourites" VerticalAlignment="Center"/></StackPanel></Button>
+                <Button x:Name="RecentlyAddedButton" Style="{StaticResource NavButton}" Click="RecentlyAddedButton_Click"><StackPanel Orientation="Horizontal"><TextBlock Text="&#xE823;" Style="{StaticResource Icon}" FontSize="15" Margin="0,0,9,0"/><TextBlock Text="New additions" VerticalAlignment="Center"/></StackPanel></Button>
+            </StackPanel>
+            <Button x:Name="ChooseFolderButton" Grid.Column="1" Style="{StaticResource BaseButton}" Background="{StaticResource AccentBrush}" Foreground="{StaticResource OnPrimaryBrush}" FontSize="12" FontWeight="SemiBold" Padding="20,12" VerticalAlignment="Center" Click="ChooseFolderButton_Click" ToolTip="Choose a folder for your collection">
+                <StackPanel Orientation="Horizontal"><TextBlock Text="&#xE710;" Style="{StaticResource Icon}" FontSize="12" Margin="0,0,9,0"/><TextBlock Text="Add music folder" VerticalAlignment="Center"/></StackPanel>
+            </Button>
+        </Grid>
+
+        <!-- Calm collection surface; track, artist and album have separate columns. -->
+        <Border Grid.Row="2" Grid.Column="0" Background="#211F26" CornerRadius="28" Margin="0,0,20,0">
+            <Grid Margin="24,0,24,0">
+                <Grid.RowDefinitions><RowDefinition x:Name="CollectionHeaderRow" Height="112"/><RowDefinition x:Name="CollectionToolbarRow" Height="62"/><RowDefinition Height="42"/><RowDefinition Height="*"/><RowDefinition Height="40"/></Grid.RowDefinitions>
+                <Grid Margin="2,20,2,0">
+                    <Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions>
+                    <StackPanel VerticalAlignment="Center"><TextBlock x:Name="LibraryPageTitle" Text="Your collection" FontSize="34" FontWeight="SemiBold" Foreground="#E6E0E9" TextTrimming="CharacterEllipsis"/><TextBlock Text="A little space for all your favourite sounds." Foreground="#AAA4B0" FontSize="12" Margin="0,8,0,0" TextTrimming="CharacterEllipsis"/></StackPanel>
+                    <Border Grid.Column="1" Background="#332D41" CornerRadius="12" Padding="12,7" VerticalAlignment="Center" Margin="12,0,0,0"><TextBlock x:Name="LibraryCountText" Text="Your local library" Foreground="#CAC4D0" FontSize="11" MaxWidth="160" TextTrimming="CharacterEllipsis"/></Border>
+                </Grid>
+                <Grid Grid.Row="1" Margin="2,0">
+                    <Grid.ColumnDefinitions><ColumnDefinition Width="Auto"/><ColumnDefinition Width="*"/></Grid.ColumnDefinitions>
+                    <Button x:Name="CollectionPlayButton" Style="{StaticResource BaseButton}" Background="#4F378B" Foreground="#EADDFF" FontSize="12" FontWeight="SemiBold" Padding="17,10" HorizontalAlignment="Left" VerticalAlignment="Center" Click="PlayMixButton_Click" ToolTip="Play this collection">
+                        <StackPanel Orientation="Horizontal"><TextBlock Text="&#xE768;" Style="{StaticResource Icon}" FontSize="13" Margin="0,0,8,0"/><TextBlock Text="Play collection"/></StackPanel>
+                    </Button>
+                    <TextBlock x:Name="LibrarySummaryText" Grid.Column="1" Text="Ready when you are" Foreground="#AAA4B0" FontSize="11" TextTrimming="CharacterEllipsis" VerticalAlignment="Center" HorizontalAlignment="Right" Margin="12,0,0,0"/>
+                </Grid>
+                <Grid Grid.Row="2" Margin="8,0,8,0">
+                    <Grid.ColumnDefinitions><ColumnDefinition Width="32"/><ColumnDefinition Width="1.8*"/><ColumnDefinition Width="1.2*"/><ColumnDefinition Width="1.2*"/><ColumnDefinition Width="47"/><ColumnDefinition Width="36"/></Grid.ColumnDefinitions>
+                    <Border Grid.ColumnSpan="6" BorderBrush="#49454F" BorderThickness="0,0,0,1"/>
+                    <TextBlock Text="#" FontSize="10" Foreground="#AAA4B0" VerticalAlignment="Center" Margin="4,0,0,0"/>
+                    <TextBlock Grid.Column="1" Text="Title" FontSize="11" Foreground="#AAA4B0" VerticalAlignment="Center"/>
+                    <TextBlock Grid.Column="2" Text="Artist" FontSize="11" Foreground="#AAA4B0" VerticalAlignment="Center"/>
+                    <TextBlock Grid.Column="3" Text="Album" FontSize="11" Foreground="#AAA4B0" VerticalAlignment="Center"/>
+                    <TextBlock Grid.Column="4" Text="Time" FontSize="11" Foreground="#AAA4B0" VerticalAlignment="Center" HorizontalAlignment="Right" Margin="0,0,6,0"/>
+                </Grid>
+                <Grid Grid.Row="3" Margin="0,7,0,0">
+                    <ListBox x:Name="SongsListBox" Background="Transparent" BorderThickness="0" Foreground="#E6E0E9" ItemContainerStyle="{StaticResource TrackContainer}" ScrollViewer.HorizontalScrollBarVisibility="Disabled" ScrollViewer.VerticalScrollBarVisibility="Auto" VirtualizingPanel.IsVirtualizing="True" VirtualizingPanel.VirtualizationMode="Recycling" SelectionChanged="SongsListBox_SelectionChanged" AutomationProperties.Name="Songs in your collection">
+                        <ListBox.ItemTemplate>
+                            <DataTemplate>
+                                <Grid Height="64" Margin="8,0">
+                                    <Grid.ColumnDefinitions><ColumnDefinition Width="32"/><ColumnDefinition Width="1.8*"/><ColumnDefinition Width="1.2*"/><ColumnDefinition Width="1.2*"/><ColumnDefinition Width="47"/><ColumnDefinition Width="36"/></Grid.ColumnDefinitions>
+                                    <TextBlock Text="{Binding Number}" FontSize="11" Foreground="#AAA4B0" VerticalAlignment="Center" Margin="4,0,0,0"/>
+                                    <TextBlock Grid.Column="1" Text="{Binding Title}" FontSize="13" FontWeight="SemiBold" TextTrimming="CharacterEllipsis" VerticalAlignment="Center" Margin="0,0,12,0"><TextBlock.Style><Style TargetType="TextBlock"><Setter Property="Foreground" Value="#E6E0E9"/><Style.Triggers><DataTrigger Binding="{Binding IsSelected, RelativeSource={RelativeSource AncestorType=ListBoxItem}}" Value="True"><Setter Property="Foreground" Value="#D0BCFF"/></DataTrigger></Style.Triggers></Style></TextBlock.Style></TextBlock>
+                                    <TextBlock Grid.Column="2" Text="{Binding Artist}" FontSize="12" Foreground="#CAC4D0" TextTrimming="CharacterEllipsis" VerticalAlignment="Center" Margin="0,0,12,0"/>
+                                    <TextBlock Grid.Column="3" Text="{Binding Album}" FontSize="12" Foreground="#AAA4B0" TextTrimming="CharacterEllipsis" VerticalAlignment="Center" Margin="0,0,12,0"/>
+                                    <TextBlock Grid.Column="4" Text="{Binding Duration}" Foreground="#CAC4D0" FontSize="11" VerticalAlignment="Center" HorizontalAlignment="Right" Margin="0,0,6,0"/>
+                                    <Button Grid.Column="5" Content="{Binding FavouriteGlyph}" Tag="{Binding Path}" Click="TrackFavouriteButton_Click" ToolTip="{Binding FavouriteToolTip}" AutomationProperties.Name="{Binding FavouriteToolTip}"><Button.Style><Style TargetType="Button" BasedOn="{StaticResource IconButton}"><Setter Property="FontSize" Value="15"/><Style.Triggers><DataTrigger Binding="{Binding IsFavourite}" Value="True"><Setter Property="Foreground" Value="#D0BCFF"/></DataTrigger></Style.Triggers></Style></Button.Style></Button>
+                                </Grid>
+                            </DataTemplate>
+                        </ListBox.ItemTemplate>
+                    </ListBox>
+                    <StackPanel x:Name="EmptyLibraryPanel" Visibility="Collapsed" VerticalAlignment="Center" HorizontalAlignment="Center" MaxWidth="340" Margin="18,10">
+                        <Border x:Name="EmptyLibraryIcon" Width="64" Height="64" Background="#4F378B" CornerRadius="22" Margin="0,0,0,18"><TextBlock Text="&#xE8D6;" Style="{StaticResource Icon}" FontSize="25" Foreground="#D0BCFF"/></Border>
+                        <TextBlock x:Name="EmptyLibraryTitle" Text="Make yourself at home" FontSize="23" FontWeight="SemiBold" TextAlignment="Center" TextWrapping="Wrap"/>
+                        <TextBlock x:Name="EmptyLibraryDescription" Text="Bring your favourite music along. Choose a folder to start your collection." FontSize="12" Foreground="#CAC4D0" TextAlignment="Center" TextWrapping="Wrap" LineHeight="20" Margin="0,10,0,20"/>
+                        <Button x:Name="EmptyLibraryActionButton" Content="Choose a music folder" Style="{StaticResource BaseButton}" Background="#D0BCFF" Foreground="{StaticResource OnPrimaryBrush}" FontSize="12" FontWeight="SemiBold" HorizontalAlignment="Center" Padding="20,12" Click="EmptyLibraryActionButton_Click"/>
+                    </StackPanel>
+                </Grid>
+                <Grid Grid.Row="4" Margin="8,0,8,0"><TextBlock x:Name="SidebarTrackCountText" Text="Your music lives here." FontSize="10" Foreground="#AAA4B0" VerticalAlignment="Center"/><TextBlock Text="LOCAL AUDIO" FontSize="9" Foreground="#938F99" HorizontalAlignment="Right" VerticalAlignment="Center"/></Grid>
+            </Grid>
+        </Border>
+
+        <!-- All playback controls belong to the listening card. -->
+        <Border x:Name="NowPlayingPanel" Grid.Row="2" Grid.Column="1" Background="#2B2930" CornerRadius="28">
+            <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+                <StackPanel x:Name="PlayerContentStack" Margin="22,20,22,22">
+                    <Grid x:Name="PlayerHeadingRow" Margin="2,0,0,16"><TextBlock Text="Now playing" FontSize="18" FontWeight="SemiBold" VerticalAlignment="Center"/><Button x:Name="QueueToggleButton" Style="{StaticResource IconButton}" Width="30" Height="30" Content="&#xE90B;" FontSize="15" Click="QueueToggleButton_Click" ToolTip="Show or hide upcoming songs" AutomationProperties.Name="Show or hide upcoming songs" HorizontalAlignment="Right"/></Grid>
+                    <Border x:Name="HeroArtwork" Height="242" Background="{StaticResource NovaArtwork}" CornerRadius="24" ClipToBounds="True" SizeChanged="Artwork_SizeChanged"><Image x:Name="AlbumArtImage" Stretch="UniformToFill"/></Border>
+                    <Grid x:Name="TrackMetadataPanel" Margin="2,18,0,0">
+                        <Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="36"/></Grid.ColumnDefinitions>
+                        <StackPanel><TextBlock x:Name="CurrentTrackTitleText" Text="A little room for sound" FontSize="23" FontWeight="SemiBold" TextTrimming="CharacterEllipsis"/><TextBlock x:Name="CurrentTrackArtistText" Text="Pick something you love" Foreground="#CAC4D0" FontSize="12" Margin="0,6,0,0" TextTrimming="CharacterEllipsis"/><TextBlock x:Name="CurrentAlbumText" Text="Your personal collection" Foreground="#AAA4B0" FontSize="10" Margin="0,4,0,0" TextTrimming="CharacterEllipsis"/></StackPanel>
+                        <Button x:Name="FavouriteButton" Grid.Column="1" Style="{StaticResource IconButton}" Content="&#xEB51;" Click="FavouriteButton_Click" FontSize="21" VerticalAlignment="Top" ToolTip="Save to Favourites" AutomationProperties.Name="Save current song to Favourites"/>
+                    </Grid>
+                    <Grid Margin="0,18,0,0"><Grid.ColumnDefinitions><ColumnDefinition Width="32"/><ColumnDefinition Width="*"/><ColumnDefinition Width="32"/></Grid.ColumnDefinitions>
+                        <TextBlock x:Name="CurrentTimeText" Text="0:00" FontSize="10" Foreground="#CAC4D0" VerticalAlignment="Center"/>
+                        <Slider x:Name="SongProgressSlider" Grid.Column="1" Minimum="0" Maximum="100" Value="0" ValueChanged="SongProgressSlider_ValueChanged" SmallChange="5" LargeChange="10" AutomationProperties.Name="Playback position"/>
+                        <TextBlock x:Name="DurationText" Grid.Column="2" Text="0:00" FontSize="10" Foreground="#CAC4D0" HorizontalAlignment="Right" VerticalAlignment="Center"/>
+                    </Grid>
+                    <StackPanel x:Name="TransportControls" Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,14,0,10">
+                        <Button x:Name="ShuffleButton" Style="{StaticResource IconButton}" Content="&#xE8B1;" FontSize="16" Click="ShuffleButton_Click" Margin="0,0,5,0" ToolTip="Shuffle" AutomationProperties.Name="Toggle shuffle"/>
+                        <Button x:Name="PreviousTrackButton" Style="{StaticResource IconButton}" Content="&#xE892;" FontSize="18" Click="PreviousTrackButton_Click" Margin="0,0,8,0" ToolTip="Previous track" AutomationProperties.Name="Previous track"/>
+                        <Button x:Name="PlayPauseButton" Style="{StaticResource RoundButton}" Width="60" Height="52" Background="#D0BCFF" Foreground="{StaticResource OnPrimaryBrush}" FontSize="23" Content="&#xE768;" Click="PlayPauseButton_Click" ToolTip="Play / pause (Space)" AutomationProperties.Name="Play or pause"/>
+                        <Button x:Name="NextTrackButton" Style="{StaticResource IconButton}" Content="&#xE893;" FontSize="18" Click="NextTrackButton_Click" Margin="8,0,0,0" ToolTip="Next track" AutomationProperties.Name="Next track"/>
+                        <Button x:Name="RepeatButton" Style="{StaticResource IconButton}" Content="&#xE8EE;" FontSize="16" Click="RepeatButton_Click" Margin="5,0,0,0" ToolTip="Repeat" AutomationProperties.Name="Change repeat mode"/>
+                    </StackPanel>
+                    <Grid Margin="2,0,2,0"><Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/><ColumnDefinition Width="90"/></Grid.ColumnDefinitions>
+                        <TextBlock x:Name="PlayStateText" Text="Ready when you are" Foreground="#AAA4B0" FontSize="10" VerticalAlignment="Center"/>
+                        <Button x:Name="MuteButton" Grid.Column="1" Style="{StaticResource IconButton}" Content="&#xE767;" FontSize="15" Width="30" Click="MuteButton_Click" ToolTip="Mute or unmute" AutomationProperties.Name="Mute or unmute"/>
+                        <Slider x:Name="VolumeSlider" Grid.Column="2" Minimum="0" Maximum="1" Value="0.8" SmallChange="0.05" LargeChange="0.1" ValueChanged="VolumeSlider_ValueChanged" AutomationProperties.Name="Volume"/>
+                    </Grid>
+                    <TextBlock x:Name="PlayerStatusText" Text="Your collection, ready when you are." Foreground="#AAA4B0" FontSize="9" TextWrapping="Wrap" Margin="3,7,3,0"/>
+                    <Grid x:Name="QueueHeader" Margin="2,16,0,4"><Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions>
+                        <TextBlock Text="Coming up" FontSize="13" FontWeight="SemiBold" VerticalAlignment="Center"/>
+                        <TextBlock x:Name="QueueCountText" Grid.Column="1" Text="0 songs next" Foreground="#AAA4B0" FontSize="10" VerticalAlignment="Center" Margin="0,0,6,0"/>
+                    </Grid>
+                    <ItemsControl x:Name="NextTrackQueue" ItemTemplate="{StaticResource QueueTemplate}"/>
+                </StackPanel>
+            </ScrollViewer>
+        </Border>
+
+        <!-- A quiet status line replaces the full-width playback bar. -->
+        <Grid Grid.Row="3" Grid.ColumnSpan="2" Margin="4,0,4,0">
+            <Grid.ColumnDefinitions><ColumnDefinition Width="Auto"/><ColumnDefinition Width="Auto"/><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions>
+            <Border Width="22" Height="22" CornerRadius="7" Background="{StaticResource NovaArtwork}" VerticalAlignment="Center" Margin="0,0,9,0" ClipToBounds="True" SizeChanged="Artwork_SizeChanged"><Image x:Name="MiniAlbumArtImage" Stretch="UniformToFill"/></Border>
+            <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center" MaxWidth="380"><TextBlock x:Name="TrackTitleText" Text="Nothing playing yet" FontSize="10" Foreground="#CAC4D0" TextTrimming="CharacterEllipsis" MaxWidth="190"/><TextBlock Text=" · " FontSize="10" Foreground="#938F99"/><TextBlock x:Name="TrackArtistText" Text="Find something you love" FontSize="10" Foreground="#AAA4B0" TextTrimming="CharacterEllipsis" MaxWidth="170"/></StackPanel>
+            <TextBlock x:Name="FolderPathText" Grid.Column="3" Text="Your local music collection" FontSize="9" Foreground="#938F99" TextTrimming="CharacterEllipsis" MaxWidth="420" VerticalAlignment="Center" ToolTip="{Binding Text, RelativeSource={RelativeSource Self}}"/>
+        </Grid>
+        <MediaElement x:Name="AudioPlayer" LoadedBehavior="Manual" UnloadedBehavior="Stop" Visibility="Collapsed" MediaOpened="AudioPlayer_MediaOpened" MediaEnded="AudioPlayer_MediaEnded"/>
+    </Grid>
+</Window>
+
